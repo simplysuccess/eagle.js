@@ -8,6 +8,8 @@
 
 <script>
 export default {
+  isWidget: true,
+  name: 'eg-radio-button',
   props: {
     value: {default: null},
     label: {default: null},
@@ -16,7 +18,6 @@ export default {
   methods: {
     select: function () {
       this.$emit('input', this.label)
-      console.log(this.label, this.value, this.value === this.label)
     }
   }
 }

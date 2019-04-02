@@ -4,6 +4,13 @@
     slot
 </template>
 
+<script>
+export default {
+  isWidget: true,
+  name: 'eg-modal'
+}
+</script>
+
 <style>
 .eg-modal {
   position: absolute;

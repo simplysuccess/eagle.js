@@ -12,6 +12,8 @@
 
 <script>
 export default {
+  isWidget: true,
+  name: 'eg-toggle',
   props: {
     value: {default: true},
     fontsize: {default: '0.8em'}
@@ -23,7 +25,6 @@ export default {
   },
   methods: {
     toggle: function () {
-      console.log(this.checked)
       this.checked = !this.checked
     }
   },
