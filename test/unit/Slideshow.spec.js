@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import { mount, shallow } from '@vue/test-utils'
+import { mount } from '@vue/test-utils'
 import Slideshow from '../fixtures/simpleSlideshow.vue'
 import ComplexSlideshow from '../fixtures/complexSlideshow.vue'
 
@@ -45,7 +45,7 @@ describe('Slideshow properties', () => {
         mouseNavigation: false,
         skip: true,
         backBySlide: true,
-        repeat: true,
+        repeat: true
       }
     })
     expect(wrapper.props().firstSlide).toBe(2)
@@ -87,7 +87,7 @@ describe('Slideshow initilization', () => {
   })
 
   it('has set current slide', () => {
-    expect(vm.currentSlideIndex).toBe(1)    
+    expect(vm.currentSlideIndex).toBe(1)
   })
 
   it('has the correct active slide', () => {
@@ -99,34 +99,24 @@ describe('Slideshow lifecycle hooks', () => {
   it('should register default events when created', () => {
     jest.spyOn(window, 'addEventListener')
     wrapper = mount(Slideshow, {
-      attachToDocument: true,
-      propsData: {
-        zoom: false
-      }
+      attachToDocument: true
     })
 
     expect(window.addEventListener).toHaveBeenCalled()
     expect(window.addEventListener.mock.calls[0][0]).toEqual('keydown')
+    expect(window.addEventListener.mock.calls[0][1].name).toEqual('bound handleKeydown')
     expect(window.addEventListener.mock.calls[1][0]).toEqual('click')
+    expect(window.addEventListener.mock.calls[1][1].name).toEqual('bound handleClick')
     expect(window.addEventListener.mock.calls[2][0]).toEqual('wheel')
+    expect(window.addEventListener.mock.calls[2][1].name).toEqual('bound debounced')
     expect(window.addEventListener.mock.calls[3][0]).toEqual('resize')
-  })
-
-  xit('should register additional events for zoom', () => {
-    jest.spyOn(window, 'addEventListener')
-    wrapper = mount(Slideshow, {
-      attachToDocument: true,
-    })
-
-    expect(window.addEventListener).toHaveBeenCalled()
-    expect(window.addEventListener.mock.calls[0][0]).toEqual('resize')
-    expect(window.addEventListener.mock.calls[1][0]).toEqual('mousedown')
+    expect(window.addEventListener.mock.calls[3][1].name).toEqual('bound handleResize')
   })
 
   it('should unregister events when destroyed', () => {
     jest.spyOn(window, 'removeEventListener')
     wrapper = mount(Slideshow, {
-      attachToDocument: true,
+      attachToDocument: true
     }).destroy()
 
     expect(window.removeEventListener).toHaveBeenCalled()
@@ -190,10 +180,9 @@ describe('Slideshow events', () => {
     wrapper.trigger('wheel', {
       deltaY: 100
     })
-   
-    setTimeout(() => { 
+
+    setTimeout(() => {
       expect(spy).toHaveBeenCalledTimes(1)
-      spy.mockReset()
       spy.mockRestore()
       done()
     }, 1000)
@@ -212,10 +201,9 @@ describe('Slideshow back mode', () => {
     vm.currentSlideIndex = 3
     vm.previousStep()
     await Vue.nextTick()
-      
+
     expect(vm.slides[1].active).toBeTruthy()
     expect(vm.step).toBe(1)
-
   })
 
   it('go back by step would result to previous slide last step', async () => {
@@ -248,6 +236,43 @@ describe('Slideshow features', () => {
     await Vue.nextTick()
 
     expect(vm.slides[0].active).toBeTruthy()
+  })
+
+  it('changes direction', () => {
+    const spy = jest.spyOn(vm, 'changeDirection')
+
+    vm.previousStep()
+    expect(spy).toHaveBeenCalledWith('prev')
+    spy.mockClear()
+    vm.nextStep()
+    expect(spy).toHaveBeenCalledWith('next')
+    spy.mockClear()
+    vm.previousSlide()
+    expect(spy).toHaveBeenCalledWith('prev')
+    spy.mockClear()
+    vm.nextSlide()
+    expect(spy).toHaveBeenCalledWith('next')
+    spy.mockClear()
+  })
+})
+
+describe('Slideshow on mobile', () => {
+  it('should register default events when created', () => {
+    Object.defineProperty(window, 'ontouchstart', {
+      value: {}
+    })
+    jest.spyOn(window, 'addEventListener')
+    wrapper = mount(Slideshow, {
+      attachToDocument: true
+    })
+
+    expect(window.addEventListener).toHaveBeenCalled()
+    expect(window.addEventListener.mock.calls[0][0]).toEqual('keydown')
+    expect(window.addEventListener.mock.calls[0][1].name).toEqual('bound handleKeydown')
+    expect(window.addEventListener.mock.calls[1][0]).toEqual('touchstart')
+    expect(window.addEventListener.mock.calls[1][1].name).toEqual('bound handleClick')
+    expect(window.addEventListener.mock.calls[2][0]).toEqual('resize')
+    expect(window.addEventListener.mock.calls[2][1].name).toEqual('bound handleResize')
   })
 })
 

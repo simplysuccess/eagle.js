@@ -2,6 +2,9 @@
 import throttle from 'lodash.throttle'
 import { Options } from '../main.js'
 
+const PREV = 'prev'
+const NEXT = 'next'
+
 export default {
   props: {
     firstSlide: {default: 1},
@@ -39,7 +42,7 @@ export default {
     var self = this
     this.findSlides()
 
-    if (this.$root.direction === 'prev') {
+    if (this.$root.direction === PREV) {
       this.currentSlideIndex = this.slides.length
     }
 
@@ -53,7 +56,7 @@ export default {
       }
       if (this.mouseNavigation) {
         if ('ontouchstart' in window) {
-          window.addEventListener('touchstart', this.hanldeClick)
+          window.addEventListener('touchstart', this.handleClick)
         } else {
           window.addEventListener('click', this.handleClick)
           window.addEventListener('wheel', this.handleWheel)
@@ -99,7 +102,7 @@ export default {
       this.$root.direction = direction
     },
     nextStep: function () {
-      this.changeDirection('next')
+      this.changeDirection(NEXT)
       var self = this
       this.$nextTick(function () {
         if (self.step >= self.currentSlide.steps) {
@@ -110,7 +113,7 @@ export default {
       })
     },
     previousStep: function () {
-      this.changeDirection('prev')
+      this.changeDirection(PREV)
       var self = this
       this.$nextTick(function () {
         if (self.step <= 1) {
@@ -121,6 +124,7 @@ export default {
       })
     },
     nextSlide: function () {
+      this.changeDirection(NEXT)
       var nextSlideIndex = this.currentSlideIndex + 1
       while ((nextSlideIndex < this.slides.length + 1) &&
              (this.slides[nextSlideIndex - 1].skip ||
@@ -136,6 +140,7 @@ export default {
       }
     },
     previousSlide: function () {
+      this.changeDirection(PREV)
       var previousSlideIndex = this.currentSlideIndex - 1
       while ((previousSlideIndex >= 1) &&
              (this.slides[previousSlideIndex - 1].skip ||
@@ -164,7 +169,8 @@ export default {
       }, 16)()
     },
     handleClick: function (evt) {
-      if (this.mouseNavigation && this.currentSlide.mouseNavigation && !evt.altKey) {
+      var noHref = evt.target['href'] === undefined
+      if (this.mouseNavigation && this.currentSlide.mouseNavigation && noHref && !evt.altKey) {
         var clientX = evt.clientX != null ? evt.clientX : evt.touches[0].clientX
         if (clientX < (0.25 * document.documentElement.clientWidth)) {
           evt.preventDefault()
@@ -256,11 +262,11 @@ export default {
         }
       }
       this.slideTimer = 0
-      if (this.backBySlide || newSlide.direction === 'next') {
+      if (this.backBySlide || newSlide.direction === NEXT) {
         this.step = 1
         newSlide.step = 1
         newSlide.$parent.step = 1
-      } else if (newSlide.direction === 'prev') {
+      } else if (newSlide.direction === PREV) {
         this.step = newSlide.steps
         newSlide.step = newSlide.steps
         newSlide.$parent.step = newSlide.steps
@@ -284,6 +290,6 @@ export default {
 }
 </script>
 
-<style lang="sass">
+<style lang="scss">
 @import '../themes/base.scss';
 </style>
